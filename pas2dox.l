@@ -19,6 +19,7 @@
 #include <string>
 #include <list>
 #include <algorithm>
+#include <functional>
 #include <ctype.h>
 #include <sstream>
 #ifdef _WIN32
@@ -106,8 +107,9 @@ void Convert_Type(string& pText)  ///< Type to be converted
 
   string str = pText;
 //  std::transform (str.begin(),str.end(), str.begin(), tolower); #@@
-	for(int i = 0; i < str.size(); i++)
-		str[i] = tolower(str[i]); 
+  transform (str.begin(), str.end(), str.begin(), ptr_fun <int, int> ( tolower ) );
+//	for(int i = 0; i < str.size(); i++)
+//		str[i] = tolower(str[i]); 
 
   int count = sizeof(type_conversion) / sizeof(type_conv);
 
@@ -467,8 +469,10 @@ void Convert_Op(string& pText,   ///< Operator to be converted
 
   string str = pText;
 //  std::transform (str.begin(),str.end(), str.begin(), tolower); #@@
-	for(int i = 0; i < str.size(); i++)
-		str[i] = tolower(str[i]); 
+  transform (str.begin(), str.end(), str.begin(), ptr_fun <int, int> ( tolower ) );
+//	for(int i = 0; i < str.size(); i++)
+//		str[i] = tolower(str[i]); 
+
   int count = sizeof(operator_conversion) / sizeof(op_conv);
 
   for (int i = 0; i < count; i++)
@@ -845,6 +849,7 @@ void PushText(const char* txt);
 %}
 
 %{
+#ifdef _WIN32
 /// Translate incoming text from Shift-JIS (CP932) to UTF-8.
 #define YY_INPUT(buf,result,max_size) \
 	 { \
@@ -861,6 +866,7 @@ void PushText(const char* txt);
 	else\
 	 result = (c == EOF) ? YY_NULL : (buf[0] = c, 1); \
 	 }
+#endif
 %}
 
 ID      [a-z_A-Z][a-z_A-Z0-9]*
@@ -1368,8 +1374,9 @@ NON_ID  [^a-z_A-Z0-9]
     string lowstr = str;
 
 //    std::transform (lowstr.begin(),lowstr.end(), lowstr.begin(), tolower); // #@@
-	for(int i = 0; i < lowstr.size(); i++)
-		lowstr[i] = tolower(lowstr[i]); 
+    transform (lowstr.begin(), lowstr.end(), lowstr.begin(), ptr_fun <int, int> ( tolower ) );
+//	for(int i = 0; i < lowstr.size(); i++)
+//		lowstr[i] = tolower(lowstr[i]); 
 
     int forpos = lowstr.find("for", 0);
     int dopos = lowstr.find("do", 0);
@@ -1519,8 +1526,9 @@ NON_ID  [^a-z_A-Z0-9]
 
     string str2 = str;
 //    std::transform (str.begin(),str.end(), str2.begin(), tolower); // #@@
-	for(int i = 0; i < str2.size(); i++)
-		str2[i] = tolower(str2[i]); 
+    transform (str.begin(), str.end(), str2.begin(), ptr_fun <int, int> ( tolower ) );
+//	for(int i = 0; i < str2.size(); i++)
+//		str2[i] = tolower(str2[i]); 
 
     i = str2.find("self", 0);
     if (i != string::npos)
@@ -2108,7 +2116,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <myparent>"="{S}*"record" {
-	// record���ʎq�̑O�̃X�y�[�X�����ςɂ���
+	// record識別子の前のスペース数を可変にした
   OutputLog("// processing a record structure");
 
   fprintf(OUTPUT, "struct %s\n{\n", pClass->sName.c_str());
@@ -2117,7 +2125,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <myparent>"="{S}*"packed record" {
-	// packed record���ʎq�̑O�̃X�y�[�X�����ςɂ���
+	// packed record識別子の前のスペース数を可変にした
   OutputLog("// got a packed record");
 
   fprintf(OUTPUT, "struct %s\n{\n", pClass->sName.c_str());
@@ -2267,7 +2275,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <myparent>"="{S}*"class"{S}*"(" {
-	// class���ʎq�̑O�̃X�y�[�X�����ςɂ���
+	// class識別子の前のスペース数を可変にした
   BEGIN(myparent2);
 } // Processing a class
 
@@ -2309,7 +2317,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <myparent>"="{S}*"class" {
-	// class���ʎq�̑O�̃X�y�[�X�����ςɂ���
+	// class識別子の前のスペース数を可変にした
   OutputLog("// got base class");
 
   OutputInheritedClass(0);
@@ -2487,7 +2495,7 @@ NON_ID  [^a-z_A-Z0-9]
 
   if (g_bVars)
   {
-    fprintf(OUTPUT, yytext);
+    fprintf(OUTPUT, "%s", yytext);
   }
   else
   {
@@ -2520,7 +2528,7 @@ NON_ID  [^a-z_A-Z0-9]
   if (g_bVars)
   {
     OutputLog("g_bVars is true");
-    fprintf(OUTPUT, yytext);
+    fprintf(OUTPUT, "%s", yytext);
   }
   else
   {
@@ -3269,5 +3277,5 @@ int main (int argc, char** argv)
 extern "C"
 {
   int yywrap() { return 1; }
-  void codeYYdummy() { yy_flex_realloc(0,0); }
+//  void codeYYdummy() { yy_flex_realloc(0,0); }
 }
