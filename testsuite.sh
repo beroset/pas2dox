@@ -13,7 +13,7 @@
 #   destroy current *.cpp files
 #
 
-TESTSDIR=TESTS
+TESTSDIR=test
 
 #------------------------------------------------------------------------------
 if test "$1" == ""; then
