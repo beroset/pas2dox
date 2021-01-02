@@ -1,7 +1,17 @@
 /** \file
  * classes and procedures
  */ 
+ 
 
+
+     typedef Boolean (*TCustomItemDrawText)();
+
+
+ class TNoInherit
+{
+public:
+
+public:};
 
 
 /**
@@ -19,6 +29,8 @@ SetCapacity (Longint NewCapacity
 );
    ///< Private method
   protected:
+    ///<summary>func com</summary>
+   	///<param name="mode">func par</param>
         
 Pointer Realloc (Longint &NewCapacity 
 );
@@ -72,14 +84,16 @@ public:
 
            
 TMemoryStream::Write (const Longint Buffer ,///< buffer line
+
 const Longint Count ///< counter
+
 )
 {
 #ifndef DOXYGEN_SKIP
   // some comment
+
 #endif /* DOXYGEN_SKIP */
 };
-
    
 LoadFromStream (TStream Stream 
 )

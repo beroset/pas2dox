@@ -1,7 +1,7 @@
 /** \file
  * Declared constants
  */ 
-
+ 
 
 
 
@@ -46,5 +46,25 @@
 
 
 
+
+
+      const  LINE_BEGIN =  1;
+        const  LINE_END =  2;
+      const  LINE_CONST =  3;
+   const  LINE_FUNCTION =  4;
+   const  LINE_PROCEDURE =  5;
+       const  LINE_USES =  6;
+   const  LINE_INTERFACE =  7;
+   const  LINE_IMPLEMENTATION =  8;
+   const  LINE_RESOURCESTRING =  9;
+
+   
+Integer FunctionAfterConstClause (Integer nIndex 
+)
+{
+#ifndef DOXYGEN_SKIP
+
+#endif /* DOXYGEN_SKIP */
+};
 // finished
 

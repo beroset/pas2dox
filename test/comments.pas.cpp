@@ -1,7 +1,7 @@
 /** \file
  * comments
  */ 
-
+ 
 
 
 /**
@@ -18,12 +18,19 @@
 /** block comment
  over multiple lines **/ 
 
+/* block comment on one line */
+
+/* block comment
+    function CreateControl(AOwner : TScrollBox; nCount : Integer = 5) : Boolean;
+ over multiple lines */
+
+“ú–/*Œê
+
 // end of block comment in single line comment
 /// @}
 
+interface
 
+implementation
 
-
-
-// finished
-
+end.
