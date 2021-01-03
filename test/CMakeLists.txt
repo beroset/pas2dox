@@ -4,6 +4,9 @@ function(do_test arg)
   add_test(NAME ${arg} 
     COMMAND "${CMAKE_COMMAND}" -D TESTDIR=${CMAKE_CURRENT_LIST_DIR} -P "${CMAKE_CURRENT_LIST_DIR}/testone.cmake" ../src/pas2dox "${arg}.pas"
   )
+  set_tests_properties(${arg} PROPERTIES
+    FAIL_REGULAR_EXPRESSION "Files.*are different"
+  )
 endfunction(do_test)
 
 
