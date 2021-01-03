@@ -15,7 +15,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-18.04]
+        # had to remove windows-latest because it does not have flex installed
+        # There is a way to use chocolatey to install it for windows:
+        #
+        #   choco install winflexbison3
+        #
+        # but that would need to be done only for windows.  Not sure how to do that.
+        os: [macos-latest, ubuntu-18.04]
 
     steps:
     - uses: actions/checkout@v2
