@@ -1,3 +1,7 @@
+Version 1.00
+  * Converted to use CMake 
+  * Updated unit tests
+
 Version 0.41
   * Experimental -b command line option for converting function body added
   * New -j JavaDoc processing command line parameter

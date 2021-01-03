@@ -28,8 +28,8 @@
 #endif
 
 using namespace std;
-
-const char* version = "0.50rc1";
+#include "config.h"
+const char* version = VERSION;
 const char* date = __DATE__;
 
 FILE* OUTPUT = NULL;

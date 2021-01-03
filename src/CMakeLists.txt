@@ -6,7 +6,14 @@ if(MSVC)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif(MSVC)
-FLEX_TARGET(scanner pas2dox.l ${CMAKE_CURRENT_BINARY_DIR}/pas2dox.cpp)
+
+# configure a header file to pass some of the CMake settings
+# to the source code
+configure_file (
+    "config.h.in"
+    "config.h"
+)
+FLEX_TARGET(scanner ${EXECUTABLE_NAME}.l ${CMAKE_CURRENT_BINARY_DIR}/${EXECUTABLE_NAME}.cpp)
 add_executable(${EXECUTABLE_NAME} ${FLEX_scanner_OUTPUTS})
 target_include_directories(${EXECUTABLE_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 INSTALL(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
