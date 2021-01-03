@@ -20,19 +20,18 @@
 #include <list>
 #include <algorithm>
 #include <functional>
-#include <ctype.h>
+#include <cctype>
 #include <sstream>
 #ifdef _WIN32
 # include <io.h>
 # include <windows.h>
 #endif
 
-using namespace std;
 #include "config.h"
 const char* version = VERSION;
 const char* date = __DATE__;
 
-FILE* OUTPUT = NULL;
+FILE* OUTPUT = nullptr;
 
 //*****************************************************************************
 /// Type of function
@@ -101,15 +100,12 @@ op_conv operator_conversion[] = {
 
 //*****************************************************************************
 /// Convert from Pascal type to C++ type
-void Convert_Type(string& pText)  ///< Type to be converted
+void Convert_Type(std::string& pText)  ///< Type to be converted
 {
   type_conv* p;
 
-  string str = pText;
-//  std::transform (str.begin(),str.end(), str.begin(), tolower); #@@
-  transform (str.begin(), str.end(), str.begin(), ptr_fun <int, int> ( tolower ) );
-//	for(int i = 0; i < str.size(); i++)
-//		str[i] = tolower(str[i]); 
+  std::string str = pText;
+  std::transform (str.begin(),str.end(), str.begin(), tolower);
 
   int count = sizeof(type_conversion) / sizeof(type_conv);
 
@@ -128,15 +124,15 @@ void Convert_Type(string& pText)  ///< Type to be converted
 
 //*****************************************************************************
 /// Remove spaces
-void RemoveSpaces(string& pText)  ///< String to work on
+void RemoveSpaces(std::string& pText)  ///< String to work on
 {
-  int pos = string::npos;
+  auto pos{std::string::npos};
 
   while(true)
   {
     pos = pText.find(" ", 0);
 
-    if (pos == string::npos)
+    if (pos == std::string::npos)
       break;
 
     pText.replace(pos, 1, "");
@@ -148,37 +144,28 @@ void RemoveSpaces(string& pText)  ///< String to work on
 class class_info
 {
   public:
-    class_info();
-    class_info(string name, string parent, string parent2, string var, string type);
+    class_info() = default;
+    class_info(std::string name, std::string parent, std::string parent2, std::string var, std::string type);
 
-    string sName;        /// Class Name
-    string sParent;      /// Parent Class
-    string sParent2;     /// Second Parent Class
+    std::string sName = "";        /// Class Name
+    std::string sParent = "";      /// Parent Class
+    std::string sParent2 = "";     /// Second Parent Class
 
-    string sVar;         /// Class Variable
-    string sType;        /// Class Type
+    std::string sVar = "";         /// Class Variable
+    std::string sType = "";        /// Class Type
 };
 
-class_info::class_info()
+class_info::class_info(std::string name,    ///< Class Name
+                       std::string parent,  ///< Parent Class
+                       std::string parent2, ///< Second Parent Class
+                       std::string var,     ///< Class Variable
+                       std::string type)    ///< Class Type
+    : sName{name}
+    , sParent{parent}
+    , sParent2{parent2}
+    , sVar{var}
+    , sType{type}
 {
-  sName = "";
-  sParent = "";
-  sParent2 = "";
-  sVar = "";
-  sType = "";
-}
-
-class_info::class_info(string name,    ///< Class Name
-                       string parent,  ///< Parent Class
-            		       string parent2, ///< Second Parent Class
-                       string var,     ///< Class Variable
-		                   string type)    ///< Class Type
-{
-  sName = name;
-  sParent = parent;
-  sParent2 = parent2;
-  sVar = var;
-  sType = type;
 }
 
 //*****************************************************************************
@@ -187,60 +174,34 @@ class param_info
 {
   public:
   // Copy constructor
-  param_info(const param_info& obj)  { *this = obj; }
+  param_info(const param_info& obj) = default;
 
   // Assignment operator
-  param_info& operator=(const param_info& obj);
+  param_info& operator=(const param_info& obj) = default;
 
-  param_info();
-  param_info(string type, string name, string comment, string def, bool c, bool v, bool o, bool array);
+  param_info() = default;
+  param_info(std::string type, std::string name, std::string comment, std::string def, bool c, bool v, bool o, bool array);
 
-  string sType;        /// Parameter Name
-  string sName;        /// Parameter Type
-  string sDefault;     /// Default Value
-  string sComment;     /// Associated Comment
-  bool bConst;         /// Const Parameter
-  bool bVar;           /// Var Parameter
-  bool bOut;           /// Out Parameter
-  bool bArray;         /// Array Parameter
+  std::string sType = "";        /// Parameter Name
+  std::string sName = "";        /// Parameter Type
+  std::string sComment = "";     /// Associated Comment
+  std::string sDefault = "";     /// Default Value
+  bool bConst = false;         /// Const Parameter
+  bool bVar = false;           /// Var Parameter
+  bool bOut = false;           /// Out Parameter
+  bool bArray = false;         /// Array Parameter
 };
 
-param_info& param_info::operator=(const param_info& obj)
+param_info::param_info(std::string type, std::string name, std::string comment, std::string def, bool c, bool v, bool o, bool array)
+    : sType{type}
+    , sName{name}
+    , sComment{comment}
+    , sDefault{def}
+    , bConst{c}
+    , bVar{v}
+    , bOut{o}
+    , bArray{array}
 {
-  sType = obj.sType;
-  sName = obj.sName;
-  sDefault = obj.sDefault;
-  sComment = obj.sComment;
-
-  bConst = obj.bConst;
-  bVar = obj.bVar;
-  bOut = obj.bOut;
-  bArray = obj.bArray;
-
-  return *this;
-}
-
-param_info::param_info()
-{
-  sType = "";
-  sName = "";
-  sComment = "";
-  bConst = false;
-  bVar = false;
-  bOut = false;
-  bArray = false;
-}
-
-param_info::param_info(string type, string name, string comment, string def, bool c, bool v, bool o, bool array)
-{
-  sType = type;
-  sName = name;
-  sComment = comment;
-  sDefault = def;
-  bConst = c;
-  bVar = v;
-  bOut = o;
-  bArray = array;
 }
 
 //*****************************************************************************
@@ -248,60 +209,51 @@ param_info::param_info(string type, string name, string comment, string def, boo
 class func_info
 {
   public:
-    func_info();
-    func_info(string aclass, string name, string ret, func_type ft);
+    func_info() = default;
+    func_info(std::string aclass, std::string name, std::string ret, func_type ft);
+    virtual ~func_info() = default;
 
-    string sClass;               ///< Associated Class
-    string sName;                ///< Function Name
-    string sRet;	               ///< Return Type
+    std::string sClass = "";               ///< Associated Class
+    std::string sName = "";                ///< Function Name
+    std::string sRet = "";                   ///< Return Type
 
-    func_type eFuncType;         ///< Function type
+    func_type eFuncType = NORMAL;         ///< Function type
 
- 	///< Pure virtual function that defines how this function should be formatted in Pascal.
+     ///< Pure virtual function that defines how this function should be formatted in Pascal.
     virtual void pascalize() = 0;
 };
 
-func_info::func_info()
+func_info::func_info(std::string aclass, std::string name, std::string ret, func_type ft)
+    : sClass{aclass}
+    , sName{name}
+    , sRet{ret}
+    , eFuncType{ft}
 {
-  sClass = "";
-  sName = "";
-  sRet = "";
-
-  eFuncType = NORMAL;
-}
-
-func_info::func_info(string aclass, string name, string ret, func_type ft)
-{
-  sClass = aclass;
-  sName = name;
-  sRet = ret;
-
-  eFuncType = ft;
 }
 
 /// Normal Function
 class func_info_typedef : public func_info
 {
 public:
-	func_info_typedef(){}
-	func_info_typedef(string aclass, string name, string ret, func_type ft)
-		: func_info(aclass, name, ret, ft) {}
-	virtual void pascalize(){
-		fprintf(OUTPUT, "typedef %s (*%s)(", sRet != "" ? sRet.c_str() : "void",
-			sName.c_str());
-	};
+    func_info_typedef(){}
+    func_info_typedef(std::string aclass, std::string name, std::string ret, func_type ft)
+        : func_info(aclass, name, ret, ft) {}
+    virtual void pascalize(){
+        fprintf(OUTPUT, "typedef %s (*%s)(", sRet != "" ? sRet.c_str() : "void",
+            sName.c_str());
+    };
 };
 
 class func_info_variable : public func_info
 {
 public:
-	func_info_variable(){}
-	func_info_variable(string aclass, string name, string ret, func_type ft)
-		: func_info(aclass, name, ret, ft) {}
-	virtual void pascalize(){
-		fprintf(OUTPUT, "%s (*%s)(", sRet != "" ? sRet.c_str() : "void",
-			sName.c_str());
-	};
+    func_info_variable(){}
+    func_info_variable(std::string aclass, std::string name, std::string ret, func_type ft)
+        : func_info(aclass, name, ret, ft) {}
+    virtual void pascalize(){
+        fprintf(OUTPUT, "%s (*%s)(", sRet != "" ? sRet.c_str() : "void",
+            sName.c_str());
+    };
 };
 
 
@@ -310,29 +262,23 @@ public:
 class prop_info
 {
   public:
-    prop_info();
-    prop_info(string name, string type);
+    prop_info() = default;
+    prop_info(std::string name, std::string type);
 
-    string sName;                /// Property Name
-    string sType;                /// Property Type
+    std::string sName = "";                /// Property Name
+    std::string sType = "";                /// Property Type
 
-    string sRead;                /// Read Value
-    string sWrite;               /// Write Value
-    string sDefault;             /// Default Value
+    std::string sRead;                /// Read Value
+    std::string sWrite;               /// Write Value
+    std::string sDefault;             /// Default Value
 
     bool bRead;                  /// Assign read property
 };
 
-prop_info::prop_info()
+prop_info::prop_info(std::string name, std::string type)
+    : sName{name}
+    , sType{type}
 {
-  sName = "";
-  sType = "";
-}
-
-prop_info::prop_info(string name, string type)
-{
-  sName = name;
-  sType = type;
 }
 
 //*****************************************************************************
@@ -340,51 +286,43 @@ prop_info::prop_info(string name, string type)
 class array_info
 {
   public:
-    array_info();
-    array_info(string name, string type, int size, string def);
+    array_info() = default;
+    array_info(std::string name, std::string type, int size, std::string def);
 
-    string sName;           ///< Array Name
-    string sType;           ///< Array Type
-    int nSize;              ///< Array Size
-    string sDefault;        ///< Default Values
+    std::string sName = "";           ///< Array Name
+    std::string sType = "";           ///< Array Type
+    int nSize = 0;              ///< Array Size
+    std::string sDefault = "";        ///< Default Values
 };
 
-array_info::array_info()
+array_info::array_info(std::string name, std::string type, int size, std::string def)
+    : sName{name}
+    , sType{type}
+    , nSize{size}
+    , sDefault{def}
 {
-  sName = "";
-  sType = "";
-  nSize = 0;
-  sDefault = "";
-}
-
-array_info::array_info(string name, string type, int size, string def)
-{
-  sName = name;
-  sType = type;
-  nSize = size;
-  sDefault = def;
 }
 
 //*****************************************************************************
-func_info* pFunc = NULL;
+func_info* pFunc = nullptr;
 
-class_info* pClass = NULL;
-prop_info* pProperty = NULL;
-array_info* pArray = NULL;
+class_info* pClass = nullptr;
+prop_info* pProperty = nullptr;
+array_info* pArray = nullptr;
 
-list<param_info> lstParams;        /// List Of Parameters
-list<string> g_lstComments;        /// List Of Comments
-list<param_info> g_lstParams;      /// List Of Parameters
-list<int> g_lstSize;               /// List of Integers for multi dimensional arrays
-string g_defaultvalue;
-string g_processtype;
-list<string> g_lParamType;         /// Parameter Type
+std::list<param_info> lstParams;        /// List Of Parameters
+std::list<std::string> g_lstComments;        /// List Of Comments
+std::list<param_info> g_lstParams;      /// List Of Parameters
+std::list<int> g_lstSize;               /// List of Integers for multi dimensional arrays
+std::string g_defaultvalue;
+std::string g_processtype;
+std::list<std::string> g_lParamType;         /// Parameter Type
 
 unsigned int g_nNamespaces = 0;
 unsigned int g_nBegins = 0;
 
 // Sections
-bool g_bClassBody = false;	       /// In Class Body
+bool g_bClassBody = false;           /// In Class Body
 bool g_bFuncBody = false;          /// In Function Body
 bool g_bType = false;              /// In Type Section
 bool g_bImplementation = false;    /// In Implementation Section
@@ -404,14 +342,14 @@ bool g_bConst = false;             /// Parameter is const
 bool g_bVar = false;               /// Var Parameter
 bool g_bOut = false;               /// Out Parameter
 bool g_bArray = false;             /// Array parameter
-list<string> g_lArrayStack;        /// For processing "array of array"s
+std::list<std::string> g_lArrayStack;        /// For processing "array of array"s
 
-string g_strTypedef = "";          /// array or set
-string g_strTypedefType = "";          /// array or set type
-string g_strTypedefName = "";          /// array or set name
+std::string g_strTypedef = "";          /// array or set
+std::string g_strTypedefType = "";          /// array or set type
+std::string g_strTypedefName = "";          /// array or set name
 int g_nSize = 0;                   /// Array size
 
-bool g_bComments = false;	         /// In a Comment Section
+bool g_bComments = false;             /// In a Comment Section
 
 bool g_bDebugMode = false;         /// In Debug Mode
 bool g_bKeepBody = false;          /// Keep function body
@@ -433,23 +371,23 @@ bool g_bCallback = false;          /// In function typedef
 /// Let's learn not to use macros in where inline function is more appropriate.
 inline void OutputLog(const char *s, bool newline = true)
 {
-	if(!g_bDebugMode)
-		return;
-	for(; *s; ++s){
-		// Prevent a newline to be unintentionally included in the debug output
-		if(*s == '\n')
-			fprintf(OUTPUT, "\\n");
-		else
-			fputc(*s, OUTPUT);
-	}
-	if(newline)
-		fputc('\n', OUTPUT);
+    if(!g_bDebugMode)
+        return;
+    for(; *s; ++s){
+        // Prevent a newline to be unintentionally included in the debug output
+        if(*s == '\n')
+            fprintf(OUTPUT, "\\n");
+        else
+            fputc(*s, OUTPUT);
+    }
+    if(newline)
+        fputc('\n', OUTPUT);
 }
 
 /// std::string's concatenation can do it, too.
 inline void OutputLog2(const char *s, const char *t){
-	OutputLog(s,false);
-	OutputLog(t);
+    OutputLog(s,false);
+    OutputLog(t);
 }
 
 // We leave them at this time
@@ -458,7 +396,7 @@ inline void OutputLog2(const char *s, const char *t){
 
 //*****************************************************************************
 /// Convert Operator
-void Convert_Op(string& pText,   ///< Operator to be converted
+void Convert_Op(std::string& pText,   ///< Operator to be converted
                 bool logical)    ///< Are we a logical operator?
 {
   op_conv* p;
@@ -467,11 +405,8 @@ void Convert_Op(string& pText,   ///< Operator to be converted
   if (!g_bConvertBody)
     return;
 
-  string str = pText;
-//  std::transform (str.begin(),str.end(), str.begin(), tolower); #@@
-  transform (str.begin(), str.end(), str.begin(), ptr_fun <int, int> ( tolower ) );
-//	for(int i = 0; i < str.size(); i++)
-//		str[i] = tolower(str[i]); 
+  std::string str = pText;
+  std::transform (str.begin(),str.end(), str.begin(), tolower);
 
   int count = sizeof(operator_conversion) / sizeof(op_conv);
 
@@ -497,36 +432,36 @@ void Convert_Op(string& pText,   ///< Operator to be converted
 /// Display enumerations
 void DisplayEnum(void)
 {
-  list<param_info>::iterator i;
+  std::list<param_info>::iterator i;
 
   OutputLog("// DisplayEnum");
 
   for (i = lstParams.begin(); i != lstParams.end(); ++i)
   {
-    string comm;
+    std::string comm;
 
-	fprintf(OUTPUT, "%s%s ",
+    fprintf(OUTPUT, "%s%s ",
       i->sName.c_str(),
       distance (i, lstParams.end()) == 1 ? "" : ",");
 
-	while (!g_lstComments.empty())
-	{
-	  comm = g_lstComments.front();
+    while (!g_lstComments.empty())
+    {
+      comm = g_lstComments.front();
 
       OutputLog2("//Got = ", comm.c_str());
-	  if (comm == "*/")
-	  {
-	    fprintf(OUTPUT, "%s\n", comm.c_str());
-		g_lstComments.pop_front();
-	    break;
-	  }
+      if (comm == "*/")
+      {
+        fprintf(OUTPUT, "%s\n", comm.c_str());
+        g_lstComments.pop_front();
+        break;
+      }
 
-	  fprintf(OUTPUT, "%s", comm.c_str());
+      fprintf(OUTPUT, "%s", comm.c_str());
 
-	  g_lstComments.pop_front();
-	}
+      g_lstComments.pop_front();
+    }
 
-	fprintf(OUTPUT, "\n");
+    fprintf(OUTPUT, "\n");
 
   }
 }
@@ -545,7 +480,7 @@ void RemoveParams()
 /// Process Parameter Types
 void ProcessParameterType(const char* pText)
 {
-  list<param_info>::iterator i;
+  std::list<param_info>::iterator i;
 
   // Loop through the parameters from the last type position
   for (i = lstParams.begin(); i != lstParams.end(); i++)
@@ -605,7 +540,7 @@ void ProcessEnd(void)
   if (pClass)
   {
 //    delete pClass;
-    pClass = NULL;
+    pClass = nullptr;
     g_bClassBody = false;
   }
 }
@@ -617,7 +552,7 @@ void OutputInheritedClass(int ntype)
   OutputLogNum("// Inherited Class, type = ", ntype);
   if (g_bInterface)
   {
-  	// Treat interface like a class
+      // Treat interface like a class
     fprintf(OUTPUT, "class ");
     g_bInterface = false;
   }
@@ -645,7 +580,7 @@ void OutputInheritedClass(int ntype)
     fprintf(OUTPUT, "\n{\n");
 
     // All members default to public
-   	fprintf(OUTPUT, "public:\n");
+       fprintf(OUTPUT, "public:\n");
 
     g_bClassBody = true;
   }
@@ -665,7 +600,7 @@ void ProcessEnums(void)
   if (pClass)
   {
     delete pClass;
-    pClass = NULL;
+    pClass = nullptr;
   }
 
   g_bEnum = true;
@@ -683,7 +618,7 @@ void ProcessArrays(void)
   if (pArray)
   {
     delete pArray;
-    pClass = NULL;
+    pClass = nullptr;
   }
 
   g_bEnum = true;
@@ -707,12 +642,12 @@ void ProcessFunction(func_type ft, bool variable = false)
 // Display function params
 void DisplayParams(void)
 {
-  list<param_info>::iterator i;
+  std::list<param_info>::iterator i;
 
   // Loop through parameter list
   for (i = g_lstParams.begin(); i != g_lstParams.end(); i++)
   {
-/*    string comm;
+/*    std::string comm;
 
     if(!g_lstComments.empty())
     {
@@ -746,19 +681,19 @@ void DisplayParams(void)
 // Display Variables
 void DisplayVariables(void)
 {
-  list<param_info>::iterator i;
+  std::list<param_info>::iterator i;
 
   // Loop through parameter list
   for (i = g_lstParams.begin(); i != g_lstParams.end(); i++)
   {
-    string comm;
+    std::string comm;
 
 /*
     if(!g_lstComments.empty())
     {
       comm = g_lstComments.front();
     }
-	*/
+    */
 
     if (g_bConvertBody)
     {
@@ -772,46 +707,46 @@ void DisplayVariables(void)
         i->sName.c_str(),
         comm.c_str()
         );
-		*/
+        */
 
-	OutputLog2("// val = ", i->sDefault.c_str());
+    OutputLog2("// val = ", i->sDefault.c_str());
     if (i->sDefault != "")
-	{
-	  
+    {
+      
       fprintf(OUTPUT, "%s %s %s = %s; ",
         g_bConstSec ? "const" : "",
         i->sType.c_str(),
         i->sName.c_str(),
-		i->sDefault.c_str()
+        i->sDefault.c_str()
         );
 
-	}
-	else
-	{
+    }
+    else
+    {
       fprintf(OUTPUT, "%s %s %s; ",
           g_bConstSec ? "const" : "",
           i->sType.c_str(),
           i->sName.c_str()
           );
-	}
+    }
 
-  	while (!g_lstComments.empty())
-	{
-	  comm = g_lstComments.front();
+      while (!g_lstComments.empty())
+    {
+      comm = g_lstComments.front();
 
-	  if (comm == "*/")
-	  {
-	    fprintf(OUTPUT, "%s\n", comm.c_str());
-		g_lstComments.pop_front();
-	    break;
-	  }
+      if (comm == "*/")
+      {
+        fprintf(OUTPUT, "%s\n", comm.c_str());
+        g_lstComments.pop_front();
+        break;
+      }
 
-	  fprintf(OUTPUT, "%s", comm.c_str());
+      fprintf(OUTPUT, "%s", comm.c_str());
 
-	  g_lstComments.pop_front();
-	}
+      g_lstComments.pop_front();
+    }
 
-	fprintf(OUTPUT, "\n");
+    fprintf(OUTPUT, "\n");
   }
 
   RemoveParams();
@@ -852,20 +787,20 @@ void PushText(const char* txt);
 #ifdef _WIN32
 /// Translate incoming text from Shift-JIS (CP932) to UTF-8.
 #define YY_INPUT(buf,result,max_size) \
-	 { \
-	int c = getc(yyin); \
-	if(0x81 <= c && c <= 0x9f || 0xE0 <= c && c <= 0xff){\
-		char cs[3];\
-		cs[0] = c;\
-		cs[1] = getc(yyin);\
-		cs[2] = '\0';\
-		wchar_t wcs[3] = L"";\
-		MultiByteToWideChar(932, MB_PRECOMPOSED, cs, 2, wcs, sizeof wcs);\
-		result = WideCharToMultiByte(CP_UTF8, 0, wcs, 1, buf, max_size, NULL, NULL);\
-	}\
-	else\
-	 result = (c == EOF) ? YY_NULL : (buf[0] = c, 1); \
-	 }
+     { \
+    int c = getc(yyin); \
+    if(0x81 <= c && c <= 0x9f || 0xE0 <= c && c <= 0xff){\
+        char cs[3];\
+        cs[0] = c;\
+        cs[1] = getc(yyin);\
+        cs[2] = '\0';\
+        wchar_t wcs[3] = L"";\
+        MultiByteToWideChar(932, MB_PRECOMPOSED, cs, 2, wcs, sizeof wcs);\
+        result = WideCharToMultiByte(CP_UTF8, 0, wcs, 1, buf, max_size, nullptr, nullptr);\
+    }\
+    else\
+     result = (c == EOF) ? YY_NULL : (buf[0] = c, 1); \
+     }
 #endif
 %}
 
@@ -946,7 +881,7 @@ NON_ID  [^a-z_A-Z0-9]
   OutputLog("// Got a compiler directive");
 
   if (YY_START != directive)
-  	g_nDirectiveCaller = YY_START;
+      g_nDirectiveCaller = YY_START;
   BEGIN(directive);
 }
 
@@ -1015,24 +950,24 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <PROGRAM>[ \t\n]{ID}{S}*; {
-	OutputLogHead();
-	PushText(yytext);
-	BEGIN(PROGRAM_NAME);
+    OutputLogHead();
+    PushText(yytext);
+    BEGIN(PROGRAM_NAME);
 }
 
 <PROGRAM_NAME>{ID} {
-	OutputLogHead();
-	if(g_bNamespace)
-	{
-		fprintf(OUTPUT, "namespace %s\n{\n", yytext);
-		g_nNamespaces++;
-	}
+    OutputLogHead();
+    if(g_bNamespace)
+    {
+        fprintf(OUTPUT, "namespace %s\n{\n", yytext);
+        g_nNamespaces++;
+    }
   // Get the program name
   BEGIN(PROGRAM_BEGIN);
 }
 
 <PROGRAM_BEGIN>{S}*; {
-	OutputLogHead();
+    OutputLogHead();
   BEGIN(Body);
 }
 
@@ -1063,14 +998,14 @@ NON_ID  [^a-z_A-Z0-9]
 
 <InClass,Struct,Constants,Body,Func_Body>{S}+end{S}+[^;]*";" {
   OutputLog("// Processing end with comments");
-  string str = yytext;
+  std::string str = yytext;
 
-  int i = str.find("end", 0);
-  int s = str.find(";");
-  if (i != string::npos)
+  auto i = str.find("end", 0);
+  auto s = str.find(";");
+  if (i != std::string::npos)
     str.replace(i, 4, "end;" );
 
-  if (s != string::npos)
+  if (s != std::string::npos)
     str.replace(s, 1, " ");
 
   PushText(str.c_str());
@@ -1118,14 +1053,14 @@ NON_ID  [^a-z_A-Z0-9]
     g_bType = true;
     g_bConstSec = false;
     BEGIN(mytype);
-/*
+#if 0
 // removed this to investigate other ways of handling type section
     g_bVars = true;
     fprintf(OUTPUT, "\n/*\r\n//type\n");
     g_bComments = true;
     g_bIgnore = true;
     BEGIN(vars);
-*/
+#endif
   }
   else
   {
@@ -1138,7 +1073,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <Body,Constants>^(const|resourcestring) {
-	OutputLogHead();
+    OutputLogHead();
   if (g_bIgnoreImplementation && g_bImplementation)
   {
     OutputLog("// Ignore const Section");
@@ -1181,7 +1116,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <vars>{NON_ID}+begin|asm{NON_ID}+        {
-	OutputLogHead();
+    OutputLogHead();
   OutputLogNum("// Got Begin (vars) - ", g_nBegins);
 
   if (g_bIgnore)
@@ -1205,7 +1140,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <vars>{NON_ID}+implementation{NON_ID}+ {
-	OutputLogHead();
+    OutputLogHead();
 
   if (g_bInterfaceOnly)
   {
@@ -1225,13 +1160,13 @@ NON_ID  [^a-z_A-Z0-9]
   if (pClass)
   {
     delete pClass;
-    pClass = NULL;
+    pClass = nullptr;
     g_bClassBody = false;
   }
 }
 
 <vars>{NON_ID}(function|procedure|begin){NON_ID}+ {
-	OutputLogHead();
+    OutputLogHead();
   if (g_bIgnore)
   {
     OutputLog("// section ignore");
@@ -1255,7 +1190,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <Constants>{NON_ID}+{ID}+{S}*:{S}*(function|procedure) {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog2("// detected in-place function pointer", yytext);
   if (g_bIgnore)
   {
@@ -1277,25 +1212,25 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <InPlaceCallback>{ID} {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog2("// in-place function pointer name", yytext);
   pFunc->sName = yytext;
 //  fprintf(OUTPUT, "typedef %s (*%s)(", pFunc->sRet != "" ? pFunc->sRet.c_str() : "void",
 //    pClass->sName.c_str());
-	BEGIN(InPlaceCallback2);
+    BEGIN(InPlaceCallback2);
 }
 
 <InPlaceCallback2>: {
-	OutputLogHead();
-	OutputLog("// in-place function pointer eats up :");
-	BEGIN(InPlaceCallback3);
+    OutputLogHead();
+    OutputLog("// in-place function pointer eats up :");
+    BEGIN(InPlaceCallback3);
 }
 
 <InPlaceCallback3>(function|procedure) {
-	OutputLogHead();
-	//{S}*\(.*\){S}*:{S}*{ID};
-	OutputLog2("// in-place function pointer type declaration begins, callback = ", g_bCallback ? "true" : "false");
-	BEGIN(callback);
+    OutputLogHead();
+    //{S}*\(.*\){S}*:{S}*{ID};
+    OutputLog2("// in-place function pointer type declaration begins, callback = ", g_bCallback ? "true" : "false");
+    BEGIN(callback);
 }
 
 
@@ -1326,7 +1261,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <Func_Body,IfThen,Body>")"{S}*{OPER}{S}*"(" {
-  string op = yytext;
+  std::string op = yytext;
   Convert_Op(op, true);
 
   fprintf(OUTPUT, "%s", op.c_str());
@@ -1334,7 +1269,7 @@ NON_ID  [^a-z_A-Z0-9]
 
 
 <Func_Body,IfThen,Body>{OPER} {
-  string op = yytext;
+  std::string op = yytext;
   Convert_Op(op, false);
 
   fprintf(OUTPUT, "%s", op.c_str());
@@ -1370,38 +1305,33 @@ NON_ID  [^a-z_A-Z0-9]
 
   if (g_bConvertBody)
   {
-    string str = yytext;
-    string lowstr = str;
+    std::string str = yytext;
+    std::string lowstr = str;
 
-//    std::transform (lowstr.begin(),lowstr.end(), lowstr.begin(), tolower); // #@@
-    transform (lowstr.begin(), lowstr.end(), lowstr.begin(), ptr_fun <int, int> ( tolower ) );
-//	for(int i = 0; i < lowstr.size(); i++)
-//		lowstr[i] = tolower(lowstr[i]); 
+    std::transform (lowstr.begin(),lowstr.end(), lowstr.begin(), tolower); 
 
-    int forpos = lowstr.find("for", 0);
-    int dopos = lowstr.find("do", 0);
+    auto forpos = lowstr.find("for", 0);
+    auto dopos = lowstr.find("do", 0);
 
-    int eqpos;
-
-    eqpos = str.find(":=", 0);
-    if (eqpos != string::npos)
+    auto eqpos = str.find(":=", 0);
+    if (eqpos != std::string::npos)
     {
       str.replace(eqpos, 2, " =");
     }
     else
     {
       eqpos = str.find('=', 0);
-      if (eqpos != string::npos)
+      if (eqpos != std::string::npos)
       {
         str.replace(eqpos, 2, "==");
       }
     }
 
-    int topos = lowstr.find("to", 0);
+    auto topos = lowstr.find("to", 0);
 
-    string init = str.substr(forpos + 3, eqpos - (forpos+3));
-    string initval = str.substr(eqpos+1, topos - (eqpos+1));
-    string opstr = str.substr(topos+2, dopos - (topos+2));
+    std::string init = str.substr(forpos + 3, eqpos - (forpos+3));
+    std::string initval = str.substr(eqpos+1, topos - (eqpos+1));
+    std::string opstr = str.substr(topos+2, dopos - (topos+2));
 
     fprintf(OUTPUT, "for (%s%s; %s < %s;)", init.c_str(), initval.c_str(), init.c_str(),
       opstr.c_str());
@@ -1440,12 +1370,12 @@ NON_ID  [^a-z_A-Z0-9]
 <Func_Body,IfThen>{ID}"."{ID}|{ID}"("{ID}")""."{ID} {
   if (g_bConvertBody)
   {
-    string str = yytext;
-    int i = str.find('.', 0);
+    std::string str = yytext;
+    auto i = str.find('.', 0);
     str.replace(i, 1, "->" );
 
     i = str.find("self->", 0);
-    if (i != string::npos)
+    if (i != std::string::npos)
       str.replace(i, 4, "this" );
 
     fprintf(OUTPUT, "%s", str.c_str());
@@ -1459,7 +1389,7 @@ NON_ID  [^a-z_A-Z0-9]
 <Func_Body,IfThen>{ID}";" {
   if (g_bConvertBody)
   {
-    string str = yytext;
+    std::string str = yytext;
     // todo : should think about keeping a list of variables and either
     // adding () for function calling, or leave alone for variables.
 //    int i =  str.find(';', 0);
@@ -1518,26 +1448,23 @@ NON_ID  [^a-z_A-Z0-9]
 
   if (g_bConvertBody)
   {
-    string str = yytext;
-    int i =  str.find("case ", 0);
+    std::string str = yytext;
+    auto i = str.find("case ", 0);
     str.erase(i, 5);
     i =  str.find(" of", 0);
     str.erase(i,3);
 
-    string str2 = str;
-//    std::transform (str.begin(),str.end(), str2.begin(), tolower); // #@@
-    transform (str.begin(), str.end(), str2.begin(), ptr_fun <int, int> ( tolower ) );
-//	for(int i = 0; i < str2.size(); i++)
-//		str2[i] = tolower(str2[i]); 
+    std::string str2 = str;
+    std::transform (str.begin(),str.end(), str2.begin(), tolower);
 
     i = str2.find("self", 0);
-    if (i != string::npos)
+    if (i != std::string::npos)
     {
       str = str.replace(i, 4, "this" );
     }
 
     i =  str2.find(".", 0);
-    if (i != string::npos)
+    if (i != std::string::npos)
     {
       str = str.replace(i, 1, "->" );
     }
@@ -1600,7 +1527,7 @@ NON_ID  [^a-z_A-Z0-9]
 <Body>"end." {
   fprintf(OUTPUT, "// finished\n");
   for(; 0 < g_nNamespaces; g_nNamespaces--)
-	  fprintf(OUTPUT, "}\n");
+      fprintf(OUTPUT, "}\n");
 
   if(g_bIgnoreTypeSection)
   {
@@ -1712,13 +1639,13 @@ NON_ID  [^a-z_A-Z0-9]
   if (pClass)
   {
     delete pClass;
-    pClass = NULL;
+    pClass = nullptr;
     g_bClassBody = false;
   }
 }
 
 <Constants>^var {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog("// in a type varsection");
 
   g_bType = false;
@@ -1728,7 +1655,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <Constants,mytype,Func_Body,InClass,Struct,myparent>{ID}{S}*":"{S}*"("([^)]*)")"{S}*";" {
-	OutputLogHead();
+    OutputLogHead();
   PushText(yytext);
   g_nGeneralCaller = YY_START;
   BEGIN(ProcessEnum);
@@ -1745,7 +1672,7 @@ NON_ID  [^a-z_A-Z0-9]
 
   ChangeStrings();
 
-  string str = yytext;
+  std::string str = yytext;
   int pos = str.find("(", 0);
   str = str.replace(pos, 1, "{");
   pos = str.find(")", 0);
@@ -1760,7 +1687,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <Constants,mytype,Func_Body,InClass,Struct,myparent>{ID}{S}*(":"|"="){S}*"array"{S}*"["([^\]])*"]"{S}*"of"{S}*{ID}{S}*("="{S}*"("([^)]*)")"{S}*)*";" {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog2("// Processing array = ", yytext);
 
   PushText(yytext);
@@ -1769,7 +1696,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <Constants,mytype,Func_Body,InClass,Struct,myparent>{ID}{S}*("="|":"){S}*("array"|"set"){S}*"of"{S}*{ID}{S}*";" {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog2("// Processing array = ", yytext);
 
   PushText(yytext);
@@ -1778,7 +1705,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <Constants,mytype,Func_Body,InClass,Struct,myparent>{ID}{S}*("="|":"){S}*"array"{S}*"of"{S}* {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog2("// Processing array of arbitrary type = ", yytext);
 
   PushText(yytext);
@@ -1817,7 +1744,7 @@ NON_ID  [^a-z_A-Z0-9]
   sprintf(buf, "__inplace_enum_%d", invokes);
   g_strTypedefType = buf;
   fprintf(OUTPUT, "/// Automatically generated in-place enumeration typedef by pas2dox\n");
-  fprintf(OUTPUT, "enum __inplace_enum_%d{%.*s};\n", invokes, strlen(yytext)-2, yytext+1);
+  fprintf(OUTPUT, "enum __inplace_enum_%d{%.*s};\n", invokes, static_cast<int>(strlen(yytext)-2), yytext+1);
   invokes++;
 }
 
@@ -1833,10 +1760,10 @@ NON_ID  [^a-z_A-Z0-9]
     fprintf(OUTPUT, "typedef ");
 
     // Initialize the result with the "innermost" type
-    string result = g_strTypedefType;
+    std::string result = g_strTypedefType;
 
-    // Enumerate the array stack from the back, to construct C++ template type string
-    for(list<string>::reverse_iterator it = g_lArrayStack.rbegin(); it != g_lArrayStack.rend(); it++)
+    // Enumerate the array stack from the back, to construct C++ template type std::string
+    for(std::list<std::string>::reverse_iterator it = g_lArrayStack.rbegin(); it != g_lArrayStack.rend(); it++)
     {
       result = *it + "<" + result + "> ";
     }
@@ -1902,7 +1829,7 @@ NON_ID  [^a-z_A-Z0-9]
 
   ChangeStrings();
 
-  string str = yytext;
+  std::string str = yytext;
   int pos = str.find("(", 0);
   str = str.replace(pos, 1, "{");
   pos = str.find(")", 0);
@@ -1916,9 +1843,9 @@ NON_ID  [^a-z_A-Z0-9]
   OutputLog("// Processing array type");
   fprintf(OUTPUT, "%s %s", pArray->sType.c_str(), pArray->sName.c_str());
 
-  list<int>::iterator i;
+  std::list<int>::iterator i;
 
-  string comm;
+  std::string comm;
   char buf[12];
   comm = "/*!< [";
   int c = g_lstSize.size();
@@ -1932,19 +1859,19 @@ NON_ID  [^a-z_A-Z0-9]
      comm += buf;
   #endif
 
-	if (pos+1 < c)
-	{
-	  comm += "..";
-	}
-	else
-	{
-	  comm += "] */";
-	}
+    if (pos+1 < c)
+    {
+      comm += "..";
+    }
+    else
+    {
+      comm += "] */";
+    }
   }
 
   if (c > 0)
   {
-	fprintf(OUTPUT, "[%d]", g_lstSize.back());
+    fprintf(OUTPUT, "[%d]", g_lstSize.back());
   }
 
   g_lstSize.clear();
@@ -1954,14 +1881,14 @@ NON_ID  [^a-z_A-Z0-9]
   if (pArray)
   {
     delete pArray;
-    pArray = NULL;
+    pArray = nullptr;
   }
 
   BEGIN(g_nGeneralCaller);
 }
 
 <Constants>{ID}{S}*(","{S}*{ID}{S}*)+":"{S}*{ID}{S}*";" {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog("// got a multiple definition");
 
   PushText(yytext);
@@ -1970,7 +1897,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <Constants>{ID}{S}*":"{S}*{ID}{S}*";" {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog("// Constants");
   PushText(yytext);
   g_nGeneralCaller = YY_START;
@@ -1978,7 +1905,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <Constants>{ID}{S}*":"{S}*{ID}{S}*"="{S}*{NUM}";" {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog2("// here 1723 ", yytext);
   PushText(yytext);
   g_nGeneralCaller = YY_START;
@@ -1986,14 +1913,14 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <Constants>{ID}{S}*"="{S}*('[^'\n]*'|[^;{\n]*)";" {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog2("// x = [']y['] = ", yytext);
   PushText(yytext);
   BEGIN(ConstAssign1);
 }
 
 <ConstAssign1>{ID} {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog2("// got ID = ", yytext);
 
   if (pClass)
@@ -2019,7 +1946,7 @@ NON_ID  [^a-z_A-Z0-9]
   if (pClass)
   {
     delete pClass;
-    pClass = NULL;
+    pClass = nullptr;
   }
 
   BEGIN(Constants);
@@ -2103,20 +2030,20 @@ NON_ID  [^a-z_A-Z0-9]
   if (pFunc)
   {
     delete pFunc;
-    pFunc = NULL;
+    pFunc = nullptr;
   }
 
   if (pClass)
   {
     delete pClass;
-    pClass = NULL;
+    pClass = nullptr;
   }
 
   BEGIN(mytype);
 }
 
 <myparent>"="{S}*"record" {
-	// record識別子の前のスペース数を可変にした
+    // record識別子の前のスペース数を可変にした
   OutputLog("// processing a record structure");
 
   fprintf(OUTPUT, "struct %s\n{\n", pClass->sName.c_str());
@@ -2125,7 +2052,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <myparent>"="{S}*"packed record" {
-	// packed record識別子の前のスペース数を可変にした
+    // packed record識別子の前のスペース数を可変にした
   OutputLog("// got a packed record");
 
   fprintf(OUTPUT, "struct %s\n{\n", pClass->sName.c_str());
@@ -2139,8 +2066,8 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <myparent>"="{S}*"set"{S}+"of"{S}*"(" {
-	ProcessEnums();
-	BEGIN(Enum);
+    ProcessEnums();
+    BEGIN(Enum);
 }
 
 <Enum>({NUM}"."{NUM}|{NUM}) {
@@ -2167,10 +2094,10 @@ NON_ID  [^a-z_A-Z0-9]
 <Enum>{ID}{S}*"="{S}*"-"*{NUM} {
   OutputLog2("// enum here 1: ", yytext);
 
-  string id = yytext;
+  std::string id = yytext;
 
   int pos = id.find('=', 0);
-  string ids = id.substr(0,pos);
+  std::string ids = id.substr(0,pos);
 
   //fprintf(OUTPUT, "int %s", ids.c_str());
     param_info p ("", yytext,  "", ids.c_str(), false, false, false, false);
@@ -2223,10 +2150,10 @@ NON_ID  [^a-z_A-Z0-9]
 <mytype>{ID}{S}*"="{S}*"-"*{NUM}".."{NUM} {
   OutputLog2("// here 1: ", yytext);
 
-  string id = yytext;
+  std::string id = yytext;
 
   int pos = id.find('=', 0);
-  string ids = id.substr(0,pos);
+  std::string ids = id.substr(0,pos);
 
   fprintf(OUTPUT, "int %s", ids.c_str());
 }
@@ -2275,7 +2202,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <myparent>"="{S}*"class"{S}*"(" {
-	// class識別子の前のスペース数を可変にした
+    // class識別子の前のスペース数を可変にした
   BEGIN(myparent2);
 } // Processing a class
 
@@ -2291,7 +2218,7 @@ NON_ID  [^a-z_A-Z0-9]
   else
   {
     OutputLog2("// Assigning parent : ", yytext);
-	OutputLog2("// Name parent : ", pClass->sName.c_str());
+    OutputLog2("// Name parent : ", pClass->sName.c_str());
     pClass->sParent = yytext;
   }
 }
@@ -2317,7 +2244,7 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <myparent>"="{S}*"class" {
-	// class識別子の前のスペース数を可変にした
+    // class識別子の前のスペース数を可変にした
   OutputLog("// got base class");
 
   OutputInheritedClass(0);
@@ -2445,7 +2372,7 @@ NON_ID  [^a-z_A-Z0-9]
   if (pProperty)
   {
     delete pProperty;
-    pProperty = NULL;
+    pProperty = nullptr;
   }
 
   g_bFom = false;
@@ -2606,9 +2533,9 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <function>{ID}"."{ID} {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog2("// processing function class.name :", yytext);
-  string s = yytext;
+  std::string s = yytext;
 
   int pos = s.find('.', 0);
   int len = s.length();
@@ -2623,13 +2550,13 @@ NON_ID  [^a-z_A-Z0-9]
 }
 
 <function>{ID} {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog2("// process function name :", yytext);
   pFunc->sName = yytext;
 }
 
 <function>"(" {
-	OutputLogHead();
+    OutputLogHead();
   OutputLog("// We've got a parameter list for this function");
   g_bParams = true;
   BEGIN(func_params);
@@ -2637,10 +2564,10 @@ NON_ID  [^a-z_A-Z0-9]
 
 <func_ret>{ID}"."{ID} {
 
-  string str = yytext;
+  std::string str = yytext;
 
-  string strUnit;
-  string strRet;
+  std::string strUnit;
+  std::string strRet;
 
   int pos = str.find('.', 0);
   int len = str.length();
@@ -2757,16 +2684,16 @@ ProcessParameterType(g_processtype.c_str());
 }
 
 <function>{S}":"{S}    {
-	OutputLogHead();
-	BEGIN(func_ret); }	// Get return type
+    OutputLogHead();
+    BEGIN(func_ret); }    // Get return type
 <function>":"    {
-	OutputLogHead();
-	BEGIN(func_ret); }		// Get return type
+    OutputLogHead();
+    BEGIN(func_ret); }        // Get return type
 
 <function>";" {
-	OutputLogHead();
+    OutputLogHead();
 
-  list<param_info>::iterator i;
+  std::list<param_info>::iterator i;
 
   OutputLog("// output function details");
   OutputLog(g_bClassBody ? "// g_bClassBody = true" : "// g_bClassBody = false");
@@ -2789,7 +2716,7 @@ ProcessParameterType(g_processtype.c_str());
     if (g_bClassBody)
     {
       // If we encounter a inner class (class contained in a class),
-      // pClass can be NULL.
+      // pClass can be nullptr.
       // In that case, just give up further processing and just
       // try not to generate an access violation.
       if(pClass)
@@ -2816,7 +2743,7 @@ ProcessParameterType(g_processtype.c_str());
     if (g_bClassBody)
     {
       // If we encounter a inner class (class contained in a class),
-      // pClass can be NULL.
+      // pClass can be nullptr.
       // In that case, just give up further processing and just
       // try not to generate an access violation.
       if(pClass)
@@ -2861,7 +2788,7 @@ ProcessParameterType(g_processtype.c_str());
   if (pFunc)
   {
     delete pFunc;
-    pFunc = NULL;
+    pFunc = nullptr;
   }
 
   if (g_bClassBody)
@@ -2923,7 +2850,7 @@ ProcessParameterType(g_processtype.c_str());
 
 <param_type>{ID}"."{ID} {
 
-  string str;
+  std::string str;
 
   str = yytext;
 
@@ -2939,7 +2866,7 @@ ProcessParameterType(g_processtype.c_str());
 <param_type>"array of" {
   OutputLog("// Processing array of ");
 
-  list<param_info>::iterator i;
+  std::list<param_info>::iterator i;
   i = lstParams.begin();
   i->bArray = true;
 }
@@ -2975,7 +2902,7 @@ ProcessParameterType(g_processtype.c_str());
   BEGIN(ProcessVariable);
 }
 
-<ProcessVariableType>":" {}	// Eat up the colon
+<ProcessVariableType>":" {}    // Eat up the colon
 
 <ProcessVariableType>{ID} {
   OutputLog2("// ProcessVariableType :", yytext);
@@ -3026,12 +2953,12 @@ ProcessParameterType(g_processtype.c_str());
 <InClass,Struct,Constants,mytype>{ID}{S}*":"{S}*"-"*{NUM}{S}*".."{S}*"-"*{NUM}{S}*";" {
   OutputLog2("// got a subrange var = ", yytext);
 
-  string str = yytext;
+  std::string str = yytext;
   int pos = str.find(':', 0);
   int len = str.length();
 
-  string name = str.substr(0,pos);
-  string rest = str.substr(pos + 1, len -(pos+1) );
+  std::string name = str.substr(0,pos);
+  std::string rest = str.substr(pos + 1, len -(pos+1) );
 
   fprintf(OUTPUT, "long %s;  ", name.c_str());
   fprintf(OUTPUT, "/**< Subrange %s */\n", rest.c_str());
@@ -3056,7 +2983,7 @@ ProcessParameterType(g_processtype.c_str());
   OutputLog2("// process a class variable", yytext);
 
   // If we encounter a inner class (class contained in a class),
-  // pClass can be NULL.
+  // pClass can be nullptr.
   // In that case, just give up further processing and just
   // try not to generate an access violation.
   if(pClass)
@@ -3089,7 +3016,7 @@ ProcessParameterType(g_processtype.c_str());
   }
 }
 
-<ClassVar>":" {}	// Eat up the colon
+<ClassVar>":" {}    // Eat up the colon
 
 <ClassVar>{ID} {
   OutputLog2("// classvar ID :", yytext);
@@ -3126,7 +3053,7 @@ ProcessParameterType(g_processtype.c_str());
 
 <Uses>;         { BEGIN(Body); }
 <Uses>{ID} { // Convert used unit names to C preprocessor's include directive
-	fprintf(OUTPUT, "#include \"%s.pas\"\n", yytext);
+    fprintf(OUTPUT, "#include \"%s.pas\"\n", yytext);
 }
 <Uses>, {}
 
@@ -3150,19 +3077,21 @@ void PushText(const char* txt)   ///< Text to be put back
 void version_info(void)
 {
   fprintf(stdout, "Pas2Dox version %s %s\n", version, date);
-  fprintf(stdout, "Copyright Darren Bowles 2002,2003\n\n");
-  fprintf(stdout, "Pas2dox is a Pascal/Delphi/Kylix input filter for Doxygen\n\n");
-  fprintf(stdout, "pas2dox [-hdkiobsnm] <input_file>\n");
-  fprintf(stdout, " -h - Help Information\n");
-  fprintf(stdout, " -d - Run In Debug Mode\n");
-  fprintf(stdout, " -k - Don't Comment Out Function Body\n");
-  fprintf(stdout, " -i - Process only \'Interface\' section\n");
-  fprintf(stdout, " -j - JavaDoc processing\n");
-  fprintf(stdout, " -o - Output to filename.cpp instead of console\n");
-  fprintf(stdout, " -b - Experimental convert function body to c++\n");
-  fprintf(stdout, " -s - Suppress generation of \\sa clauses on properties\n");
-  fprintf(stdout, " -n - Generate enclosing namespace with unit name\n");
-  fprintf(stdout, " -m - Do not ignore implementation section");
+  fprintf(stdout, 
+      "Copyright Darren Bowles 2002,2003\n\n"
+      "Pas2dox is a Pascal/Delphi/Kylix input filter for Doxygen\n\n"
+      "pas2dox [-hdkiobsnm] <input_file>\n"
+      " -h - Help Information\n"
+      " -d - Run In Debug Mode\n"
+      " -k - Don't Comment Out Function Body\n"
+      " -i - Process only \'Interface\' section\n"
+      " -j - JavaDoc processing\n"
+      " -o - Output to filename.cpp instead of console\n"
+      " -b - Experimental convert function body to c++\n"
+      " -s - Suppress generation of \\sa clauses on properties\n"
+      " -n - Generate enclosing namespace with unit name\n"
+      " -m - Do not ignore implementation section\n"
+  );
 }
 
 int main (int argc, char** argv)
@@ -3216,7 +3145,7 @@ int main (int argc, char** argv)
 
       case 'h':
       default:
-	    bEnd = true;
+        bEnd = true;
       }
     }
     else
@@ -3235,7 +3164,7 @@ int main (int argc, char** argv)
         yyin = fopen(argv[i], "r");
 #endif
 
-        if (yyin == NULL)
+        if (yyin == nullptr)
         {
           fprintf(stdout, "Error : Filename %s Not Found.\n", argv[i]);
           return 1;
@@ -3245,7 +3174,7 @@ int main (int argc, char** argv)
 
         if (bOutput)
         {
-          string filename = argv[i];
+          std::string filename = argv[i];
           filename += ".cpp";
 
           OUTPUT = fopen(filename.c_str(), "w");
