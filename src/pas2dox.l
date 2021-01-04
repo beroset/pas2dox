@@ -3061,14 +3061,13 @@ ProcessParameterType(g_processtype.c_str());
 <Uses>;         { BEGIN(Body); }
 <Uses>{ID}{S}+"in"{S}+'.*' { // Convert used unit names to C preprocessor's include directive
     std::string token{yytext};
-    // find the first quotation mark
-    auto a{token.find("'")};
-    // advance beyond it
-    ++a;
     // find the last quotation mark
-    auto b{token.rfind("'")};
+    auto a{token.rfind("'")};
+    token.erase(a);
+    // find the first quotation mark
+    a = token.find("'") + 1;
     // save the chars between as the filename
-    auto filename{token.substr(a, b-a)};
+    auto filename{token.substr(a)};
     // now trim the token to just the ID
     a = token.find_first_of(" \t\n\r");
     token.erase(a);
