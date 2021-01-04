@@ -246,7 +246,7 @@ func_info::func_info(std::string aclass, std::string name, std::string ret, func
 class func_info_typedef : public func_info
 {
 public:
-    func_info_typedef(){}
+    func_info_typedef() = default;
     func_info_typedef(std::string aclass, std::string name, std::string ret, func_type ft)
         : func_info(aclass, name, ret, ft) {}
     virtual void pascalize(){
@@ -258,7 +258,7 @@ public:
 class func_info_variable : public func_info
 {
 public:
-    func_info_variable(){}
+    func_info_variable() = default;
     func_info_variable(std::string aclass, std::string name, std::string ret, func_type ft)
         : func_info(aclass, name, ret, ft) {}
     virtual void pascalize(){
@@ -372,14 +372,12 @@ bool g_bGenerateSa = true;         /// Generate \sa clauses
 bool g_bNamespace = false;         /// Generate enclosing namespace
 bool g_bIgnoreImplementation = false; /// Default is to include implementation
 
-int g_nCommentCaller = 0;          /// Inteligent returning from comments
-int g_nDirectiveCaller = 0;        /// Inteligent returning from preprocessor directives
+int g_nCommentCaller = 0;          /// Intelligent returning from comments
+int g_nDirectiveCaller = 0;        /// Intelligent returning from preprocessor directives
 int g_nGeneralCaller = 0;          /// Intelligent return
 bool g_bCallback = false;          /// In function typedef
 
-//#define OutputLog(s) { if(g_bDebugMode) fprintf(OUTPUT, "%s\n", s); }
 
-/// Let's learn not to use macros in where inline function is more appropriate.
 inline void OutputLog(const char *s, bool newline = true)
 {
     if(!g_bDebugMode)
