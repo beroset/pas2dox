@@ -99,13 +99,24 @@ op_conv operator_conversion[] = {
 };
 
 //*****************************************************************************
+/// Lowercase Copy
+std::string LowercaseCopy(const std::string& original)  ///< String to copy
+{
+    std::string str2 = original;
+    // note that this is using the version of tolower from <cctype>
+    // which takes and yields and int, rather than std::tolower
+    // from <locale> which takes and yields a CharT.
+    std::transform (original.begin(), original.end(), str2.begin(), tolower);
+    return str2;
+}
+
+//*****************************************************************************
 /// Convert from Pascal type to C++ type
 void Convert_Type(std::string& pText)  ///< Type to be converted
 {
   type_conv* p;
 
-  std::string str = pText;
-  std::transform (str.begin(),str.end(), str.begin(), tolower);
+  std::string str = LowercaseCopy(pText);
 
   int count = sizeof(type_conversion) / sizeof(type_conv);
 
@@ -322,7 +333,7 @@ unsigned int g_nNamespaces = 0;
 unsigned int g_nBegins = 0;
 
 // Sections
-bool g_bClassBody = false;           /// In Class Body
+bool g_bClassBody = false;         /// In Class Body
 bool g_bFuncBody = false;          /// In Function Body
 bool g_bType = false;              /// In Type Section
 bool g_bImplementation = false;    /// In Implementation Section
@@ -405,8 +416,7 @@ void Convert_Op(std::string& pText,   ///< Operator to be converted
   if (!g_bConvertBody)
     return;
 
-  std::string str = pText;
-  std::transform (str.begin(),str.end(), str.begin(), tolower);
+  std::string str = LowercaseCopy(pText);
 
   int count = sizeof(operator_conversion) / sizeof(op_conv);
 
@@ -1306,9 +1316,7 @@ NON_ID  [^a-z_A-Z0-9]
   if (g_bConvertBody)
   {
     std::string str = yytext;
-    std::string lowstr = str;
-
-    std::transform (lowstr.begin(),lowstr.end(), lowstr.begin(), tolower); 
+    std::string lowstr = LowercaseCopy(str);
 
     auto forpos = lowstr.find("for", 0);
     auto dopos = lowstr.find("do", 0);
@@ -1454,8 +1462,7 @@ NON_ID  [^a-z_A-Z0-9]
     i =  str.find(" of", 0);
     str.erase(i,3);
 
-    std::string str2 = str;
-    std::transform (str.begin(),str.end(), str2.begin(), tolower);
+    std::string str2 = LowercaseCopy(str);
 
     i = str2.find("self", 0);
     if (i != std::string::npos)
@@ -3052,6 +3059,22 @@ ProcessParameterType(g_processtype.c_str());
 }
 
 <Uses>;         { BEGIN(Body); }
+<Uses>{ID}{S}+"in"{S}+'.*' { // Convert used unit names to C preprocessor's include directive
+    std::string token{yytext};
+    // find the first quotation mark
+    auto a{token.find("'")};
+    // advance beyond it
+    ++a;
+    // find the last quotation mark
+    auto b{token.rfind("'")};
+    // save the chars between as the filename
+    auto filename{token.substr(a, b-a)};
+    // now trim the token to just the ID
+    a = token.find_first_of(" \t\n\r");
+    token.erase(a);
+    fprintf(OUTPUT, "// for \"%s\"\n", token.c_str());
+    fprintf(OUTPUT, "#include \"%s\"\n", filename.c_str());
+}
 <Uses>{ID} { // Convert used unit names to C preprocessor's include directive
     fprintf(OUTPUT, "#include \"%s.pas\"\n", yytext);
 }
