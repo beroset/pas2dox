@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.1)
 set(EXECUTABLE_NAME "pas2dox")
 find_package(FLEX)
 if(MSVC)

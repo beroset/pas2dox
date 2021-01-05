@@ -1,5 +1,3 @@
-message(STATUS "crosscompiling: ${CMAKE_CROSSCOMPILING}")
-message(STATUS "crosscompiling_emulator: ${CMAKE_CROSSCOMPILING_EMULATOR}")
 add_test(NAME Runs COMMAND pas2dox)
 
 function(do_test arg)
@@ -10,7 +8,6 @@ function(do_test arg)
     FAIL_REGULAR_EXPRESSION "Files.*are different"
   )
 endfunction(do_test)
-
 
 do_test(array)
 do_test(classes)
