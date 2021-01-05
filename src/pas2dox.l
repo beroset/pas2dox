@@ -792,12 +792,13 @@ void PushText(const char* txt);
 %}
 
 %{
+#ifdef WITH_JIS_TRANSLATE
 #ifdef _WIN32
 /// Translate incoming text from Shift-JIS (CP932) to UTF-8.
 #define YY_INPUT(buf,result,max_size) \
      { \
     int c = getc(yyin); \
-    if(0x81 <= c && c <= 0x9f || 0xE0 <= c && c <= 0xff){\
+    if((0x81 <= c && c <= 0x9f) || (0xE0 <= c && c <= 0xff)){\
         char cs[3];\
         cs[0] = c;\
         cs[1] = getc(yyin);\
@@ -810,6 +811,7 @@ void PushText(const char* txt);
      result = (c == EOF) ? YY_NULL : (buf[0] = c, 1); \
      }
 #endif
+#endif // WITH_JIS_TRANSLATE
 %}
 
 ID      [a-z_A-Z][a-z_A-Z0-9]*

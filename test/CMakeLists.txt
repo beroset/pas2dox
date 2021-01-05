@@ -1,8 +1,10 @@
+message(STATUS "crosscompiling: ${CMAKE_CROSSCOMPILING}")
+message(STATUS "crosscompiling_emulator: ${CMAKE_CROSSCOMPILING_EMULATOR}")
 add_test(NAME Runs COMMAND pas2dox)
 
 function(do_test arg)
   add_test(NAME ${arg} 
-    COMMAND "${CMAKE_COMMAND}" -D TESTDIR=${CMAKE_CURRENT_LIST_DIR} -P "${CMAKE_CURRENT_LIST_DIR}/testone.cmake" ../src/pas2dox "${arg}.pas"
+    COMMAND "${CMAKE_COMMAND}" -D TESTDIR=${CMAKE_CURRENT_LIST_DIR} -P "${CMAKE_CURRENT_LIST_DIR}/testone.cmake" $<TARGET_FILE:pas2dox> "${arg}.pas" "${CMAKE_CROSSCOMPILING_EMULATOR}"
   )
   set_tests_properties(${arg} PROPERTIES
     FAIL_REGULAR_EXPRESSION "Files.*are different"
